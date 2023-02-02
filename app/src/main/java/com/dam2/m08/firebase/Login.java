@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.TokenWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,7 +22,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+
+import java.util.HashMap;
 
 public class Login extends AppCompatActivity {
 
@@ -29,12 +36,33 @@ public class Login extends AppCompatActivity {
     private EditText usuario;
     private EditText password;
     private Button btn_login;
-
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+
+
+
+        //60 segundos de intervalo para recargar los datos
+        FirebaseRemoteConfig firebaseConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setMinimumFetchIntervalInSeconds(60)
+                .build();
+        firebaseConfig.setConfigSettingsAsync(configSettings);
+        //final recargo de datos
+
+
+        //crea un map para definir los valores por defecto por si existe algun problema en firebase
+
+        HashMap map = new HashMap();
+        map.put("muestra_btn_registro",true);
+        map.put("usuario_A_registrado",false);
+        map.put("usuario_B_registrado",false);
+        firebaseConfig.setDefaultsAsync(map);
+        //fin definido de valores
+
         btn_back = findViewById(R.id.btn_back_login);
 
         btn_back.setOnClickListener(new View.OnClickListener() {
@@ -65,9 +93,13 @@ public class Login extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()){
+                                        //token
+                                        getTokenAndPush();
+                                        //envia al home de la app
                                         showHome();
                                     }
                                     else {
+                                        //muestra error
                                         showAlertError();
                                     }
                                 }
@@ -76,9 +108,8 @@ public class Login extends AppCompatActivity {
             }
         });
     }
-    //obtener el token
-    private void notification(){
-
+    //obtiene el token y lo sube a la base de datos junto con el email del usuario
+    private void getTokenAndPush(){
         FirebaseMessaging.getInstance().getToken()
                 .addOnCompleteListener(new OnCompleteListener<String>() {
                     @Override
@@ -87,12 +118,15 @@ public class Login extends AppCompatActivity {
                             System.out.println("Fetching FCM registration token failed"+ task.getException());
                             return;
                         }
-
-                        // Get new FCM registration token
                         String token = task.getResult();
 
+                        //codigo para llamar a la base de datos si el usuario esta registrado actualiza token
+                        DocumentReference documentReference= db.collection("usuarios").document(usuario.getText().toString());
+                        HashMap<String,String> map = new HashMap<>();
+                        map.put("token", token);
+                        documentReference.set(map);
 
-                        Toast.makeText(Login.this, token, Toast.LENGTH_SHORT).show();
+
                     }
                 });
     }

@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeResult;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Register extends AppCompatActivity {
 
@@ -26,6 +27,7 @@ public class Register extends AppCompatActivity {
     private Button btn_register;
     private EditText usuario;
     private EditText password;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +59,9 @@ public class Register extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()){
+                                        //crea usuario
+                                        db.collection("usuarios").document(usuario.getText().toString());
+
                                         Intent intent = new Intent(Register.this, Login.class);
                                         startActivity(intent);
                                     }
