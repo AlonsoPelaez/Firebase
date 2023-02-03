@@ -43,6 +43,9 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
+        btn_login = findViewById(R.id.btnLogin);
+        usuario = findViewById(R.id.edtxt_Usuario_Login);
+        password = findViewById(R.id.edtxt_Contraseña_Login);
 
 
         //60 segundos de intervalo para recargar los datos
@@ -78,9 +81,7 @@ public class Login extends AppCompatActivity {
 
 
     private void setup(){
-        btn_login = findViewById(R.id.btnLogin);
-        usuario = findViewById(R.id.edtxt_Usuario_Login);
-        password = findViewById(R.id.edtxt_Contraseña_Login);
+
 
 
         btn_login.setOnClickListener(new View.OnClickListener() {
@@ -122,7 +123,7 @@ public class Login extends AppCompatActivity {
 
                         //codigo para llamar a la base de datos si el usuario esta registrado actualiza token
                         DocumentReference documentReference= db.collection("usuarios").document(usuario.getText().toString());
-                        HashMap<String,String> map = new HashMap<>();
+                        HashMap map = new HashMap<>();
                         map.put("token", token);
                         documentReference.set(map);
 
