@@ -19,7 +19,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeResult;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Register extends AppCompatActivity {
 
@@ -59,8 +63,11 @@ public class Register extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()){
-                                        //crea usuario
-                                        db.collection("usuarios").document(usuario.getText().toString());
+                                        //crea el usuario y lo sube a la base de datos firestore
+                                        DocumentReference documentReference = db.collection("usuarios").document(usuario.getText().toString());
+                                        HashMap map = new HashMap();
+                                        map.put("token","");
+                                        documentReference.set(map);
 
                                         Intent intent = new Intent(Register.this, Login.class);
                                         startActivity(intent);

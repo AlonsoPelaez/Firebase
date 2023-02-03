@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -40,6 +42,11 @@ public class Home extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
+
+        btn_save = findViewById(R.id.btn_save);
+        titulo = findViewById(R.id.titulo_doc);
+        contenido = findViewById(R.id.contenido_doc);
+
         setTitle("Inicio");
 
 
@@ -54,52 +61,54 @@ public class Home extends AppCompatActivity {
         editor.apply();
 
         guardaDoc();
+        cargaDoc();
+
+    }
+
+    private void cargaDoc() {
+        db.collection("documentos").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()){
+                    for (QueryDocumentSnapshot document : task.getResult()){
+                        Toast.makeText(Home.this, (CharSequence) document.getData(),Toast.LENGTH_LONG).show();
+                    }
+                }
+                else {
+                    Toast.makeText(Home.this, "ha ocurrido un error al cargar los datos",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
     }
 
     private void guardaDoc() {
-        btn_save = findViewById(R.id.btn_save);
-        titulo = findViewById(R.id.titulo_doc);
-        contenido = findViewById(R.id.contenido_doc);
 
         HashMap map = new HashMap();
-        List<String> docIds= new ArrayList<>();
+
 
         btn_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                DocumentReference docRef = db.collection("documentos").document();
                 map.put("titulo",titulo.getText().toString());
                 map.put("contenido", contenido.getText().toString());
-                docRef.set(map);
-                String docId = docRef.getId();
 
-                CollectionReference collectionReference = db.collection("documentos");
+                String docId=null;
 
-                collectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots){
-                            String id = documentSnapshot.getId();
-                            docIds.add(id);
-                        }
-                    }
-                });
+                if (docId != null){
+                    DocumentReference documentReference = db.collection("documentos").document(docId);
+                    documentReference.set(map);
+
+                }
+                else {
+                    // crea la bbdd con el nombre de documentos e introduce el titulo y contenido
+                    DocumentReference docRef = db.collection("documentos").document();
+                    docRef.set(map);
 
 
-                
-//                docRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-//                        List<String> documentsIds = new ArrayList<>();
-//
-//                    }
-//                });
-//
-//
-//
-//                db.collection("documentos").document().set(map);
+                    //obtiene el id del documento creado
+                    docId = docRef.getId();
+                }
             }
         });
 
