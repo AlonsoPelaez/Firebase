@@ -36,6 +36,7 @@ public class Home extends AppCompatActivity {
     private Button btn_save;
     private EditText titulo;
     private EditText contenido;
+    private String docId;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
@@ -46,8 +47,9 @@ public class Home extends AppCompatActivity {
         btn_save = findViewById(R.id.btn_save);
         titulo = findViewById(R.id.titulo_doc);
         contenido = findViewById(R.id.contenido_doc);
-
         setTitle("Inicio");
+
+        cargaDoc();
 
 
 
@@ -61,24 +63,29 @@ public class Home extends AppCompatActivity {
         editor.apply();
 
         guardaDoc();
-        cargaDoc();
+
 
     }
 
     private void cargaDoc() {
-        db.collection("documentos").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()){
-                    for (QueryDocumentSnapshot document : task.getResult()){
-                        Toast.makeText(Home.this, (CharSequence) document.getData(),Toast.LENGTH_LONG).show();
+        if (docId!=null){
+            db.collection("documentos").document(docId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()){
+
+                        System.out.println("id------------------->" + task.getResult().getId());
+                        System.out.println("titulo------------------->" + task.getResult().getData().get("titulo"));
+                        titulo.setText(task.getResult().getData().get("titulo").toString());
+                        System.out.println("contenido--------------------->"+ task.getResult().getData().get("contenido"));
+                        titulo.setText(task.getResult().getData().get("contenido").toString());
+                    }
+                    else {
+                        System.out.println("ha ocurrido un error " + task.getException());
                     }
                 }
-                else {
-                    Toast.makeText(Home.this, "ha ocurrido un error al cargar los datos",Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+            });
+        }
 
     }
 
@@ -93,7 +100,6 @@ public class Home extends AppCompatActivity {
                 map.put("titulo",titulo.getText().toString());
                 map.put("contenido", contenido.getText().toString());
 
-                String docId=null;
 
                 if (docId != null){
                     DocumentReference documentReference = db.collection("documentos").document(docId);
