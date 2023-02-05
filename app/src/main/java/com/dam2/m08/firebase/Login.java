@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.TokenWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,6 +38,7 @@ public class Login extends AppCompatActivity {
     private EditText password;
     private Button btn_login;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private static final String TAG ="FIREBASE_ANDROID_STUDIO___LOGIN";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,27 +48,15 @@ public class Login extends AppCompatActivity {
         btn_login = findViewById(R.id.btnLogin);
         usuario = findViewById(R.id.edtxt_Usuario_Login);
         password = findViewById(R.id.edtxt_Contraseña_Login);
-
-
-        //60 segundos de intervalo para recargar los datos
-        FirebaseRemoteConfig firebaseConfig = FirebaseRemoteConfig.getInstance();
-        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-                .setMinimumFetchIntervalInSeconds(60)
-                .build();
-        firebaseConfig.setConfigSettingsAsync(configSettings);
-        //final recargo de datos
-
-
-        //crea un map para definir los valores por defecto por si existe algun problema en firebase
-
-        HashMap map = new HashMap();
-        map.put("muestra_btn_registro",true);
-        map.put("usuario_A_registrado",false);
-        map.put("usuario_B_registrado",false);
-        firebaseConfig.setDefaultsAsync(map);
-        //fin definido de valores
-
         btn_back = findViewById(R.id.btn_back_login);
+
+
+        setup();
+
+    }
+
+
+    private void setup(){
 
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,14 +65,6 @@ public class Login extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        setup();
-
-    }
-
-
-    private void setup(){
-
-
 
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,6 +76,7 @@ public class Login extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()){
+                                        Log.d(TAG, "onComplete: setup()" );
                                         //token
                                         getTokenAndPush();
                                         //envia al home de la app
@@ -101,7 +84,7 @@ public class Login extends AppCompatActivity {
                                     }
                                     else {
                                         //muestra error
-                                        showAlertError();
+                                        showAlertError(task.getException().getMessage());
                                     }
                                 }
                             });
@@ -111,12 +94,14 @@ public class Login extends AppCompatActivity {
     }
     //obtiene el token y lo sube a la base de datos junto con el email del usuario
     private void getTokenAndPush(){
+        Log.d(TAG, "getTokenAndPush: ");
         FirebaseMessaging.getInstance().getToken()
                 .addOnCompleteListener(new OnCompleteListener<String>() {
                     @Override
                     public void onComplete(@NonNull Task<String> task) {
                         if (!task.isSuccessful()) {
-                            System.out.println("Fetching FCM registration token failed"+ task.getException());
+
+                            Log.d(TAG, "Fetching FCM registration token failed " + task.getException());
                             return;
                         }
                         String token = task.getResult();
@@ -126,7 +111,7 @@ public class Login extends AppCompatActivity {
                         HashMap map = new HashMap<>();
                         map.put("token", token);
                         documentReference.set(map);
-
+                        Log.d(TAG, "token :añadido ");
 
                     }
                 });
@@ -136,16 +121,17 @@ public class Login extends AppCompatActivity {
         Intent intent = new Intent(this, Home.class);
         intent.putExtra("email",usuario.getText().toString());
         startActivity(intent);
+        Log.d(TAG, "showHome: ");
     }
-    private void showAlertError(){
+    private void showAlertError(String mensaje){
         AlertDialog.Builder alert= new AlertDialog.Builder(this);
         alert.setTitle("Error");
-        alert.setMessage("Ha ocurrido un error ");
+        alert.setMessage(mensaje);
         alert.setCancelable(false);
         alert.setPositiveButton("ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(Login.this, MainActivity.class);
+                Intent intent = new Intent(Login.this, Login.class);
                 startActivity(intent);
             }
         });

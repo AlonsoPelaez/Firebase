@@ -23,7 +23,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -36,7 +38,7 @@ public class Home extends AppCompatActivity {
     private Button btn_save;
     private EditText titulo;
     private EditText contenido;
-    private String docId;
+    private static final String TAG ="FIREBASE_ANDROID_STUDIO___HOME";
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
@@ -49,11 +51,14 @@ public class Home extends AppCompatActivity {
         contenido = findViewById(R.id.contenido_doc);
         setTitle("Inicio");
 
+        preferences();
         cargaDoc();
+        guardaDoc();
 
 
-
-
+    }
+    private void preferences(){
+        Log.d(TAG, "preferences: ");
         Intent intent = getIntent();
         String usuario= intent.getStringExtra("email");
 
@@ -61,60 +66,38 @@ public class Home extends AppCompatActivity {
         SharedPreferences.Editor editor = prefer.edit();
         editor.putString("email",usuario);
         editor.apply();
-
-        guardaDoc();
-
-
     }
 
     private void cargaDoc() {
-        if (docId!=null){
-            db.collection("documentos").document(docId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()){
+        Log.d(TAG, "cargaDoc: ");
+        db.collection("documentos").document("kNniQPs2NdaKRd1LRXYX").addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot documento, @Nullable FirebaseFirestoreException error) {
 
-                        System.out.println("id------------------->" + task.getResult().getId());
-                        System.out.println("titulo------------------->" + task.getResult().getData().get("titulo"));
-                        titulo.setText(task.getResult().getData().get("titulo").toString());
-                        System.out.println("contenido--------------------->"+ task.getResult().getData().get("contenido"));
-                        titulo.setText(task.getResult().getData().get("contenido").toString());
+                    if (documento != null && documento.exists()){
+                        titulo.setText(documento.getString("titulo"));
+                        contenido.setText(documento.getString("contenido"));
                     }
                     else {
-                        System.out.println("ha ocurrido un error " + task.getException());
+                        Log.d(TAG, "Error: "+ error.getMessage());
                     }
-                }
-            });
-        }
+            }
+        });
 
     }
 
     private void guardaDoc() {
-
-        HashMap map = new HashMap();
-
+        Log.d(TAG, "guardaDoc: ");
 
         btn_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                HashMap map = new HashMap();
                 map.put("titulo",titulo.getText().toString());
                 map.put("contenido", contenido.getText().toString());
 
-
-                if (docId != null){
-                    DocumentReference documentReference = db.collection("documentos").document(docId);
-                    documentReference.set(map);
-
-                }
-                else {
-                    // crea la bbdd con el nombre de documentos e introduce el titulo y contenido
-                    DocumentReference docRef = db.collection("documentos").document();
-                    docRef.set(map);
-
-
-                    //obtiene el id del documento creado
-                    docId = docRef.getId();
-                }
+                db.collection("documentos").document("kNniQPs2NdaKRd1LRXYX").set(map);
             }
         });
 
@@ -139,6 +122,7 @@ public class Home extends AppCompatActivity {
             editor.apply();
 
             FirebaseAuth.getInstance().signOut();
+            
             Intent intent = new Intent(this,MainActivity.class);
             startActivity(intent);
         }
