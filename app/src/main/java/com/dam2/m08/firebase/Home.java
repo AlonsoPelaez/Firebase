@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,7 +20,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -29,11 +27,9 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-public class Home extends AppCompatActivity {
+public class Home extends AppCompatActivity  {
 
     private Button btn_save;
     private EditText titulo;
@@ -98,6 +94,29 @@ public class Home extends AppCompatActivity {
                 map.put("contenido", contenido.getText().toString());
 
                 db.collection("documentos").document("kNniQPs2NdaKRd1LRXYX").set(map);
+
+
+                CollectionReference usuarios = db.collection("usuarios");
+
+                usuarios.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
+
+                            SharedPreferences preferences = getSharedPreferences(getString(R.string.prefer_file), Context.MODE_PRIVATE);
+                            String usuario = preferences.getString("email","");
+
+                            if (documentSnapshot.getId().equals(usuario)) {
+                                Log.d(TAG, "usuarios: " + documentSnapshot.getId() + " " + documentSnapshot.getString("token"));
+                                String token = documentSnapshot.getString("token");
+                                MyFirebaseMessagingService myFirebaseMessagingService = new MyFirebaseMessagingService();
+                                myFirebaseMessagingService.sendMessage(token, usuario);
+                            }
+
+                        }
+                    }
+                });
+
             }
         });
 

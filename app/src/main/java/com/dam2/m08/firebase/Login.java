@@ -78,7 +78,9 @@ public class Login extends AppCompatActivity {
                                     if (task.isSuccessful()){
                                         Log.d(TAG, "onComplete: setup()" );
                                         //token
-                                        getTokenAndPush();
+                                        MyFirebaseMessagingService myFirebaseMessagingService = new MyFirebaseMessagingService();
+                                        myFirebaseMessagingService.generaToken(usuario.getText().toString());
+
                                         //envia al home de la app
                                         showHome();
                                     }
@@ -91,30 +93,6 @@ public class Login extends AppCompatActivity {
                 }
             }
         });
-    }
-    //obtiene el token y lo sube a la base de datos junto con el email del usuario
-    private void getTokenAndPush(){
-        Log.d(TAG, "getTokenAndPush: ");
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-
-                            Log.d(TAG, "Fetching FCM registration token failed " + task.getException());
-                            return;
-                        }
-                        String token = task.getResult();
-
-                        //codigo para llamar a la base de datos si el usuario esta registrado actualiza token
-                        DocumentReference documentReference= db.collection("usuarios").document(usuario.getText().toString());
-                        HashMap map = new HashMap<>();
-                        map.put("token", token);
-                        documentReference.set(map);
-                        Log.d(TAG, "token :añadido ");
-
-                    }
-                });
     }
 
     public void showHome(){
