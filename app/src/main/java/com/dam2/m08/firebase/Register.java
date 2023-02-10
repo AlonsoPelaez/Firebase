@@ -120,7 +120,7 @@ public class Register extends AppCompatActivity {
                         }
                         if (cantidadUsuarios==2) {
                             HashMap map = new HashMap();
-                            map.put("muestra_btn_registro",false);
+                            map.put("muestra_btn_registro", false);
                             firebaseRemoteConfig.setDefaultsAsync(map);
                             Log.d(TAG, "cantidadusuarios: " +cantidadUsuarios);
                             Log.d(TAG, "muestra_btn_registro dentro if: "+firebaseRemoteConfig.getBoolean("muestra_btn_registro"));

@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Firebase</string>
     <string name="prefer_file">com.dam2.m08.Firebase.Reference_File</string>
+    <string name="inicia_sesion">Inicia Sesion</string>
+    <string name="registrate">Registrate</string>
 </resources>

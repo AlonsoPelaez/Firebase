@@ -27,7 +27,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:text="Inicia Sesion"
+            android:text="@string/inicia_sesion"
             android:textAlignment="center"
             android:textSize="30sp" />
 
@@ -43,7 +43,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:text="Registrate"
+            android:text="@string/registrate"
             android:textAlignment="center"
             android:textSize="30sp" />
 

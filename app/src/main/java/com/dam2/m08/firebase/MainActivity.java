@@ -5,15 +5,17 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import androidx.activity.result.ActivityResultLauncher;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -31,17 +33,10 @@ public class MainActivity extends AppCompatActivity{
     private View layoutPrincipal;
     private Boolean muestra_btn_registro=true;
     private static final String TAG ="FIREBASE_ANDROID_MAIN";
-    private boolean ejecutado=false;
+//    private boolean ejecutado=false;
 //    private static final String PREF_NAME = "MyPref";
 //    private static final String SETTING_EXECUTED = "settingExecuted";
-//private final ActivityResultLauncher<String> requestPermissionLauncher =
-//        registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-//            if (isGranted) {
-//                // FCM SDK (and your app) can post notifications.
-//            } else {
-//                // TODO: Inform user that that your app will not show notifications.
-//            }
-//        });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,24 +69,6 @@ public class MainActivity extends AppCompatActivity{
 
 
 
-//    private void askNotificationPermission() {
-//        // This is only necessary for API level >= 33 (TIRAMISU)
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-//                    PackageManager.PERMISSION_GRANTED) {
-//                // FCM SDK (and your app) can post notifications.
-//            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-//                // TODO: display an educational UI explaining to the user the features that will be enabled
-//                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
-//                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
-//                //       If the user selects "No thanks," allow the user to continue without notifications.
-//            } else {
-//                // Directly ask for the permission
-//                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-//            }
-//        }
-//    }
-
 
 
     private void setup(){
@@ -107,7 +84,7 @@ public class MainActivity extends AppCompatActivity{
         });
 
     }
-    
+
     private void setConfigSetting() {
         Log.d(TAG, "setConfigSetting: dentro");
 
@@ -117,8 +94,8 @@ public class MainActivity extends AppCompatActivity{
                 .setMinimumFetchIntervalInSeconds(10)
                 .build();
         firebaseConfig.setConfigSettingsAsync(configSettings);
-//        firebaseConfig.setDefaultsAsync(Collections.singletonMap("muestra_btn_registro",true));
-//        firebaseConfig.fetchAndActivate();
+        firebaseConfig.setDefaultsAsync(Collections.singletonMap("muestra_btn_registro",true));
+        firebaseConfig.fetchAndActivate();
 
 //
 //        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
