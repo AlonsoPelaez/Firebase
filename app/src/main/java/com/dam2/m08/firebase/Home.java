@@ -1,9 +1,13 @@
 package com.dam2.m08.firebase;
 
+
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+
 import android.os.Bundle;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,11 +17,13 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
+import androidx.core.app.NotificationManagerCompat;
+
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -26,6 +32,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 
@@ -34,38 +41,55 @@ public class Home extends AppCompatActivity  {
     private Button btn_save;
     private EditText titulo;
     private EditText contenido;
-    private static final String TAG ="FIREBASE_ANDROID_STUDIO___HOME";
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
 
-        btn_save = findViewById(R.id.btn_save);
-        titulo = findViewById(R.id.titulo_doc);
-        contenido = findViewById(R.id.contenido_doc);
-        setTitle("Inicio");
 
+        NotificationManagerCompat manager = NotificationManagerCompat.from(this);
+        if (manager.areNotificationsEnabled()) {
+            FirebaseMessaging.getInstance().setNotificationDelegationEnabled(true);
+        }
+
+
+        setup();
         preferences();
         cargaDoc();
-        guardaDoc();
+//        guardaDoc();
 
 
     }
+
+    private void setup(){
+        setTitle("Home");
+
+        btn_save = findViewById(R.id.btn_save);
+        titulo = findViewById(R.id.titulo_doc);
+        contenido = findViewById(R.id.contenido_doc);
+
+        btn_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                guardaDoc();
+            }
+        });
+    }
+
     private void preferences(){
-        Log.d(TAG, "preferences: ");
         Intent intent = getIntent();
         String usuario= intent.getStringExtra("email");
 
         SharedPreferences prefer= getSharedPreferences(getString(R.string.prefer_file), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefer.edit();
         editor.putString("email",usuario);
+        Log.d("firebase-android", "preferences: "+ usuario);
         editor.apply();
     }
 
     private void cargaDoc() {
-        Log.d(TAG, "cargaDoc: ");
         db.collection("documentos").document("kNniQPs2NdaKRd1LRXYX").addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documento, @Nullable FirebaseFirestoreException error) {
@@ -75,7 +99,7 @@ public class Home extends AppCompatActivity  {
                         contenido.setText(documento.getString("contenido"));
                     }
                     else {
-                        Log.d(TAG, "Error: "+ error.getMessage());
+                        showAlertError(error.getMessage());
                     }
             }
         });
@@ -83,11 +107,6 @@ public class Home extends AppCompatActivity  {
     }
 
     private void guardaDoc() {
-        Log.d(TAG, "guardaDoc: ");
-
-        btn_save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
                 HashMap map = new HashMap();
                 map.put("titulo",titulo.getText().toString());
@@ -107,18 +126,16 @@ public class Home extends AppCompatActivity  {
                             String usuario = preferences.getString("email","");
 
                             if (documentSnapshot.getId().equals(usuario)) {
-                                Log.d(TAG, "usuarios: " + documentSnapshot.getId() + " " + documentSnapshot.getString("token"));
+
                                 String token = documentSnapshot.getString("token");
                                 MyFirebaseMessagingService myFirebaseMessagingService = new MyFirebaseMessagingService();
                                 myFirebaseMessagingService.sendMessage(token, usuario);
+
                             }
 
                         }
                     }
                 });
-
-            }
-        });
 
     }
 
@@ -142,10 +159,24 @@ public class Home extends AppCompatActivity  {
 
             FirebaseAuth.getInstance().signOut();
             
-            Intent intent = new Intent(this,MainActivity.class);
+            Intent intent = new Intent(this,Login.class);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
 
+    }
+
+
+    private void showAlertError(String mensaje){
+        AlertDialog.Builder alert= new AlertDialog.Builder(this);
+        alert.setTitle("Error");
+        alert.setMessage(mensaje);
+        alert.setCancelable(false);
+        alert.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        });
+        alert.create().show();
     }
 }
