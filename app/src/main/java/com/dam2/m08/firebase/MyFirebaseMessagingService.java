@@ -3,6 +3,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -10,20 +11,22 @@ import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingRegistrar;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService{
 
@@ -62,6 +65,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService{
                         .setContentTitle("Documento Modificado")
                         .setContentText(messageBody)
                         .setAutoCancel(true)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setSound(defaultSoundUri)
                         .setContentIntent(pendingIntent);
 
@@ -78,7 +82,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService{
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
     }
-
+    private void showAlertError(String mensaje){
+        AlertDialog.Builder alert= new AlertDialog.Builder(this);
+        alert.setTitle("Error");
+        alert.setMessage(mensaje);
+        alert.setCancelable(false);
+        alert.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        });
+        alert.create().show();
+    }
 
 
     public void generaToken(String usuario){
@@ -86,7 +101,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService{
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
 
-                        Log.d(TAG, "Fetching FCM registration token failed " + task.getException());
+                        showAlertError(task.getException().getMessage());
                         return;
                     }
                     String token = task.getResult();
@@ -96,28 +111,43 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService{
                     HashMap<String, String> map = new HashMap<>();
                     map.put("token", token);
                     documentReference.set(map);
-                    Log.d(TAG, "token :añadido ");
 
                 });
     }
-    public void sendMessage(String token, String usuario){
+    public JsonObjectRequest sendMessage(String token, String usuario){
 
-        Log.d(TAG, "token: "+ token);
+        JSONObject notification = new JSONObject();
+        try {
 
-        FirebaseMessaging messaging = FirebaseMessaging.getInstance();
-        RemoteMessage message= new RemoteMessage.Builder(token)
-                .addData("titulo","Documento Modificado")
-                .addData("contenido", usuario + "ha modificado el documento")
-                .build();
+            notification.put("to",token);
+            notification.put("notification", new JSONObject()
+                    .put("title","Documento Modificado")
+                    .put("body",usuario + " ha modificado el documento")
+                    .put("icon",R.drawable.ic_stat_notification)
+            );
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
-        messaging.send(message);
-        Log.d(TAG, "FirebaseMessaging.getInstance().isNotificationDelegationEnabled(): "+ FirebaseMessaging.getInstance().isNotificationDelegationEnabled());
-        Log.d(TAG, " FirebaseMessaging.getInstance().isAutoInitEnabled(): "+ FirebaseMessaging.getInstance().isAutoInitEnabled());
-
-    }
-
-    @Override
-    public void onNewToken(@NonNull String token) {
-        super.onNewToken(token);
+        String url="https://fcm.googleapis.com/fcm/send";
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                notification,
+                response -> {
+                    Log.d(TAG, "sendMessage: se ha enviado con exito");
+                },
+                error -> {
+                    Log.d(TAG, "sendMessage: ha ocurrido un error");
+                }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "key=AAAAN-mP0qE:APA91bF60PQG-U9t56PhPssaSRRikUYMv4kjyeZ8AHtt2FmZ1OM8REgCcHHxsUfgFpHVoU4T70e52JrMRCPr-lLKSu-W_KJHpPfNKuH9ZUYfBf-WP9-H9TYHssntITUBmAQBzczPHULr");
+                headers.put("Content-Type", "application/json");
+                return headers;
+            }
+        };
+        return request;
     }
 }

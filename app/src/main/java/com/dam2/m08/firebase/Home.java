@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 
 import android.os.Bundle;
 
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +21,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.core.app.NotificationManagerCompat;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,6 +44,7 @@ public class Home extends AppCompatActivity  {
     private EditText titulo;
     private EditText contenido;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,11 +88,11 @@ public class Home extends AppCompatActivity  {
         SharedPreferences prefer= getSharedPreferences(getString(R.string.prefer_file), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefer.edit();
         editor.putString("email",usuario);
-        Log.d("firebase-android", "preferences: "+ usuario);
         editor.apply();
     }
 
     private void cargaDoc() {
+
         db.collection("documentos").document("kNniQPs2NdaKRd1LRXYX").addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documento, @Nullable FirebaseFirestoreException error) {
@@ -112,6 +115,8 @@ public class Home extends AppCompatActivity  {
                 map.put("titulo",titulo.getText().toString());
                 map.put("contenido", contenido.getText().toString());
 
+
+
                 db.collection("documentos").document("kNniQPs2NdaKRd1LRXYX").set(map);
 
 
@@ -125,11 +130,13 @@ public class Home extends AppCompatActivity  {
                             SharedPreferences preferences = getSharedPreferences(getString(R.string.prefer_file), Context.MODE_PRIVATE);
                             String usuario = preferences.getString("email","");
 
-                            if (documentSnapshot.getId().equals(usuario)) {
+                            if (!documentSnapshot.getId().equals(usuario)) {
 
                                 String token = documentSnapshot.getString("token");
                                 MyFirebaseMessagingService myFirebaseMessagingService = new MyFirebaseMessagingService();
-                                myFirebaseMessagingService.sendMessage(token, usuario);
+                                JsonObjectRequest request=myFirebaseMessagingService.sendMessage(token, usuario);
+                                RequestQueue queue= Volley.newRequestQueue(Home.this);
+                                queue.add(request);
 
                             }
 

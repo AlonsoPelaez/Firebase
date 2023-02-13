@@ -113,7 +113,6 @@ public class Register extends AppCompatActivity {
                                 HashMap map = new HashMap();
                                 map.put("muestra_btn_registro", false);
                                 firebaseRemoteConfig.setDefaultsAsync(map);
-
                             }
                         }
                         else {

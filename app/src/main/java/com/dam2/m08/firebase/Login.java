@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import android.util.Log;
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,8 +19,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+
 import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -29,7 +30,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 
@@ -46,6 +46,10 @@ public class Login extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+
+
+
+
 
         btn_login = findViewById(R.id.btnLogin);
         usuario = findViewById(R.id.edtxt_Usuario_Login);
@@ -66,6 +70,7 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!usuario.getText().toString().isEmpty() && !password.getText().toString().isEmpty()){
+
                     FirebaseAuth.getInstance()
                             .signInWithEmailAndPassword(usuario.getText().toString(), password.getText().toString())
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -106,7 +111,7 @@ public class Login extends AppCompatActivity {
 
     private void setConfigSetting() {
 
-        //60 segundos de intervalo para recargar los datos
+
         FirebaseRemoteConfig firebaseConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
                 .setMinimumFetchIntervalInSeconds(10)
@@ -148,11 +153,10 @@ public class Login extends AppCompatActivity {
     private void session(){
         SharedPreferences prefer= getSharedPreferences(getString(R.string.prefer_file), Context.MODE_PRIVATE);
         String email = prefer.getString("email",null);
-        Log.d("firebase-android", "session: "+ email);
+
         if (email != null){
             Intent intent = new Intent(this, Home.class);
             intent.putExtra("email",email);
-            Log.d("firebase-android", "dentro if: "+email);
             startActivity(intent);
         }
     }
