@@ -25,11 +25,13 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class Register extends AppCompatActivity {
@@ -39,6 +41,7 @@ public class Register extends AppCompatActivity {
     private EditText usuario;
     private EditText password;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private static final String TAG = "FIREBASE_ANDROID__REGISTER";
 
 
     @Override
@@ -73,6 +76,7 @@ public class Register extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()){
+
                                             //crea el usuario y lo sube a la base de datos firestore
                                             DocumentReference documentReference = db.collection("usuarios").document(usuario.getText().toString());
                                             HashMap map = new HashMap();
@@ -93,34 +97,40 @@ public class Register extends AppCompatActivity {
     }
 
     private void compruebaUsuariosRegistrados(){
-
-
-
         CollectionReference usuarios = db.collection("usuarios");
         Task<QuerySnapshot> task =usuarios.get();
         task.addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
                 int cantidadUsuarios = queryDocumentSnapshots.size();
 
+                HashMap map = new HashMap();
+                if (cantidadUsuarios!=0){
+                    CollectionReference usuarios_registrados = db.collection("usuarios_registrados");
 
-                FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-                firebaseRemoteConfig.fetchAndActivate().addOnCompleteListener(new OnCompleteListener<Boolean>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Boolean> task) {
-                        if (task.isSuccessful()){
-                            if (cantidadUsuarios==2) {
-                                HashMap map = new HashMap();
-                                map.put("muestra_btn_registro", false);
-                                firebaseRemoteConfig.setDefaultsAsync(map);
-                            }
-                        }
-                        else {
-                            showAlertError(task.getException().getMessage());
-                        }
+                    boolean usuarioARegistrado = false;
 
+                    for (DocumentSnapshot ds : queryDocumentSnapshots){
+                        Map<String, Object> estadoUsuario = new HashMap<>();
+                        estadoUsuario.put("email", ds.getId());
+                        estadoUsuario.put("registrado", true);
+
+                        if (!usuarioARegistrado) {
+                            usuarios_registrados.document("usuario_A").set(map);
+                            map.put("usuario_A_registrado", true);
+                            firebaseRemoteConfig.setDefaultsAsync(map);
+                            usuarioARegistrado = true;
+                        } else {
+                            usuarios_registrados.document("usuario_B").set(map);
+                            map.put("usuario_B_registrado",true);
+                            firebaseRemoteConfig.setDefaultsAsync(map);
+                            break;
+                        }
                     }
-                });
+                }
+                firebaseRemoteConfig.fetchAndActivate();
+
             }
         });
 

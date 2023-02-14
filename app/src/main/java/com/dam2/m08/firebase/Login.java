@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,8 +26,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
@@ -41,6 +46,7 @@ public class Login extends AppCompatActivity {
     private Button btn_login;
     private Button btn_register;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private static final String TAG = "FIREBASE_ANDROID__LOGIN";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -117,30 +123,40 @@ public class Login extends AppCompatActivity {
                 .setMinimumFetchIntervalInSeconds(10)
                 .build();
         firebaseConfig.setConfigSettingsAsync(configSettings);
-
-        HashMap map = new HashMap();
-        map.put("muestra_btn_registro",true);
-        firebaseConfig.setDefaultsAsync(map);
         firebaseConfig.fetchAndActivate();
+
 
     }
 
     private void compruebaEstadoDelBoton(){
 
         FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+
         firebaseRemoteConfig.fetchAndActivate().addOnCompleteListener(new OnCompleteListener<Boolean>() {
             @Override
             public void onComplete(@NonNull Task<Boolean> task) {
                 if (!task.isSuccessful()){
+                    showAlertError(task.getException().getMessage());
                 }
                 else {
-                    boolean muestra_btn_registro = firebaseRemoteConfig.getBoolean("muestra_btn_registro");
 
-                    if (!muestra_btn_registro){
-                        btn_register.setVisibility(View.GONE);
-                    }else {
-                        btn_register.setVisibility(View.VISIBLE);
-                    }
+//                    db.collection("usuarios_registrados").addSnapshotListener(new EventListener<QuerySnapshot>() {
+//                        @Override
+//                        public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+//                            for (DocumentSnapshot ds : value){
+//                                if (ds.getId().equals("usuario_A"))
+//                            }
+//                        }
+//                    });
+//                    boolean usuario_B_registrado = firebaseRemoteConfig.getBoolean("usuario_B_registrado");
+//                    Log.d(TAG, "usuario a: " + usuario_A_registrado);
+//                    Log.d(TAG, "usuario b: " + usuario_B_registrado);
+//                    if (usuario_A_registrado && usuario_B_registrado){
+//                        btn_register.setVisibility(View.GONE);
+//
+//                    }else {
+//                        btn_register.setVisibility(View.VISIBLE);
+//                    }
                 }
             }
         });

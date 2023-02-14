@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,6 +45,7 @@ public class Home extends AppCompatActivity  {
     private EditText titulo;
     private EditText contenido;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private static final String TAG = "FIREBASE_ANDROID__HOME";
 
 
     @Override
@@ -129,10 +131,11 @@ public class Home extends AppCompatActivity  {
 
                             SharedPreferences preferences = getSharedPreferences(getString(R.string.prefer_file), Context.MODE_PRIVATE);
                             String usuario = preferences.getString("email","");
-
+                            Log.d(TAG, "usuario: "+usuario);
                             if (!documentSnapshot.getId().equals(usuario)) {
 
                                 String token = documentSnapshot.getString("token");
+
                                 MyFirebaseMessagingService myFirebaseMessagingService = new MyFirebaseMessagingService();
                                 JsonObjectRequest request=myFirebaseMessagingService.sendMessage(token, usuario);
                                 RequestQueue queue= Volley.newRequestQueue(Home.this);
