@@ -140,23 +140,15 @@ public class Login extends AppCompatActivity {
                 }
                 else {
 
-//                    db.collection("usuarios_registrados").addSnapshotListener(new EventListener<QuerySnapshot>() {
-//                        @Override
-//                        public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-//                            for (DocumentSnapshot ds : value){
-//                                if (ds.getId().equals("usuario_A"))
-//                            }
-//                        }
-//                    });
-//                    boolean usuario_B_registrado = firebaseRemoteConfig.getBoolean("usuario_B_registrado");
-//                    Log.d(TAG, "usuario a: " + usuario_A_registrado);
-//                    Log.d(TAG, "usuario b: " + usuario_B_registrado);
-//                    if (usuario_A_registrado && usuario_B_registrado){
-//                        btn_register.setVisibility(View.GONE);
-//
-//                    }else {
-//                        btn_register.setVisibility(View.VISIBLE);
-//                    }
+                    boolean usuario_A_registrado = firebaseRemoteConfig.getBoolean("usuario_A_registrado");
+                    boolean usuario_B_registrado = firebaseRemoteConfig.getBoolean("usuario_B_registrado");
+                    
+                    if (usuario_A_registrado && usuario_B_registrado){
+                        btn_register.setVisibility(View.GONE);
+
+                    }else {
+                        btn_register.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         });

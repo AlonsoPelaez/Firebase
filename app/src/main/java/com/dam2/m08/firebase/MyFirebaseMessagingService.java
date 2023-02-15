@@ -61,7 +61,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService{
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.drawable.ic_stat_notification)
+//                        .setSmallIcon(R.drawable.ic_stat_notification)
                         .setContentTitle("Documento Modificado")
                         .setContentText(messageBody)
                         .setAutoCancel(true)
@@ -123,7 +123,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService{
             notification.put("notification", new JSONObject()
                     .put("title","Documento Modificado")
                     .put("body",usuario + " ha modificado el documento")
-                    .put("icon",R.drawable.ic_stat_notification)
+//                    .put("icon", R.drawable.ic_stat_notification)
             );
         }catch (Exception e){
             e.printStackTrace();

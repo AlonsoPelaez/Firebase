@@ -77,6 +77,7 @@ public class Register extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()){
 
+                                        compruebaUsuariosRegistrados();
                                             //crea el usuario y lo sube a la base de datos firestore
                                             DocumentReference documentReference = db.collection("usuarios").document(usuario.getText().toString());
                                             HashMap map = new HashMap();
@@ -84,7 +85,6 @@ public class Register extends AppCompatActivity {
                                             documentReference.set(map);
                                             Intent intent = new Intent(Register.this, Login.class);
                                             startActivity(intent);
-                                            compruebaUsuariosRegistrados();
                                     }
                                     else {
                                         showAlertError(task.getException().getMessage());
@@ -106,31 +106,33 @@ public class Register extends AppCompatActivity {
                 int cantidadUsuarios = queryDocumentSnapshots.size();
 
                 HashMap map = new HashMap();
-                if (cantidadUsuarios!=0){
+                if (cantidadUsuarios<=2){
+
                     CollectionReference usuarios_registrados = db.collection("usuarios_registrados");
 
-                    boolean usuarioARegistrado = false;
 
                     for (DocumentSnapshot ds : queryDocumentSnapshots){
                         Map<String, Object> estadoUsuario = new HashMap<>();
-                        estadoUsuario.put("email", ds.getId());
                         estadoUsuario.put("registrado", true);
 
-                        if (!usuarioARegistrado) {
-                            usuarios_registrados.document("usuario_A").set(map);
+                        if (cantidadUsuarios==1) {
+                            estadoUsuario.put("usuario","A");
+                            usuarios_registrados.document(ds.getId()).set(map);
+
                             map.put("usuario_A_registrado", true);
                             firebaseRemoteConfig.setDefaultsAsync(map);
-                            usuarioARegistrado = true;
+
                         } else {
-                            usuarios_registrados.document("usuario_B").set(map);
-                            map.put("usuario_B_registrado",true);
+                            estadoUsuario.put("usuario","B");
+                            usuarios_registrados.document(ds.getId()).set(map);
+
+                            map.put("usuario_B_registrado", true);
                             firebaseRemoteConfig.setDefaultsAsync(map);
                             break;
                         }
                     }
                 }
                 firebaseRemoteConfig.fetchAndActivate();
-
             }
         });
 
