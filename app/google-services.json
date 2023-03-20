@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:240141718177:android:3d951838584f379b9196e0",
+        "mobilesdk_app_id": "1:240141718177:android:cc16ba3c1467d3de9196e0",
         "android_client_info": {
           "package_name": "com.dam2.m08.firebase"
         }
@@ -20,7 +20,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDdXEuOeeKBiWFPL6VD2_-FeF0bZKuqwl4"
+          "current_key": "AIzaSyDwxU1MDnffYpZV1id6QtmpxiJZvW4wUj8"
         }
       ],
       "services": {
@@ -29,6 +29,49 @@
             {
               "client_id": "240141718177-nvlhm7j1les0u8lo0cuuudnq47cli17m.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "240141718177-jbft713q065b4lsk9t6cbc7385724rec.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dam2.m08.firebase"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:240141718177:android:9febf40a6c3a35a99196e0",
+        "android_client_info": {
+          "package_name": "com.dam2.m08.proyectocameramapsfb"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "240141718177-nvlhm7j1les0u8lo0cuuudnq47cli17m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwxU1MDnffYpZV1id6QtmpxiJZvW4wUj8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "240141718177-nvlhm7j1les0u8lo0cuuudnq47cli17m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "240141718177-jbft713q065b4lsk9t6cbc7385724rec.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dam2.m08.firebase"
+              }
             }
           ]
         }

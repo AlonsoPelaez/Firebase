@@ -95,7 +95,7 @@ public class Home extends AppCompatActivity  {
 
     private void cargaDoc() {
 
-        db.collection("documentos").document("kNniQPs2NdaKRd1LRXYX").addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        db.collection("documentos").document("GN2gZyrGGpm7LhzHnmwN").addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documento, @Nullable FirebaseFirestoreException error) {
 
@@ -119,7 +119,7 @@ public class Home extends AppCompatActivity  {
 
 
 
-                db.collection("documentos").document("kNniQPs2NdaKRd1LRXYX").set(map);
+                db.collection("documentos").document("GN2gZyrGGpm7LhzHnmwN").set(map);
 
 
                 CollectionReference usuarios = db.collection("usuarios");
